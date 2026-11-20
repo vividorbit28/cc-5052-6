@@ -226,8 +226,16 @@ class World:
         self._cleanup_phase()
         self.tick += 1
 
+    def _phase_units(self, phase):
+        """参与本阶段结算的单位序列（uid 升序）。
+
+        调度器子类可裁剪候选集，但必须保证被裁掉的单位在该阶段
+        本就不会产生任何状态变化——否则逐帧摘要会立刻分歧。
+        """
+        return self.iter_units()
+
     def _movement_phase(self):
-        for u in self.iter_units():
+        for u in self._phase_units("move"):
             if not u.path:
                 u.move_clock = 0
                 continue
@@ -249,7 +257,7 @@ class World:
 
     def _combat_phase(self):
         strikes = []  # 先决策、后结算：伤害在阶段末按 uid 顺序统一生效
-        for u in self.iter_units():
+        for u in self._phase_units("combat"):
             if u.target is None:
                 continue
             tgt = self.units.get(u.target)

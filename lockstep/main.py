@@ -8,6 +8,7 @@
 无头模式：
     python3 -m lockstep --selftest   # 固定脚本逐帧打印摘要（确定性自检）
     python3 -m lockstep --demo       # 验收演示：帧率/延迟一致性、回放、分歧定位
+    python3 -m lockstep --sandbox    # 战术沙盘：候选集调度器 vs 完整模拟
     python3 -m lockstep --replay rec.json
 """
 
@@ -25,6 +26,8 @@ def main(argv=None):
                         help="无头自检：固定脚本逐帧打印状态摘要")
     parser.add_argument("--demo", action="store_true",
                         help="无头验收演示")
+    parser.add_argument("--sandbox", action="store_true",
+                        help="战术沙盘：候选集调度器 vs 完整模拟对照实验")
     parser.add_argument("--replay", metavar="FILE",
                         help="回放校验录制的输入脚本")
     parser.add_argument("--seed", type=int, default=20261118)
@@ -40,6 +43,9 @@ def main(argv=None):
     if args.demo:
         from .demo import run
         return 0 if run() else 1
+    if args.sandbox:
+        from .sandbox import demo
+        return 0 if demo() else 1
     if args.replay:
         from .replay import compare_configurations, load_recording, verify
         rec = load_recording(args.replay)
